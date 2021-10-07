@@ -24,15 +24,10 @@ import (
 type ResourceTopologyExporterSpec struct {
 }
 
-// ComponentVersion defines the versions of the operands deployed
-type ComponentVersion struct {
-	NodeResourceTopologyAPI  string `json:"noderesourcetopologyapi,omitempty"`
-	ResourceTopologyExporter string `json:"resourcetopologyexporter,omitempty"`
-}
-
 // ResourceTopologyExporterStatus defines the observed state of ResourceTopologyExporter
 type ResourceTopologyExporterStatus struct {
-	Version ComponentVersion `json:"version"`
+	// Conditions show the current state of the MetalLB Operator
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
 //+kubebuilder:object:root=true

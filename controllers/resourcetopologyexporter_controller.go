@@ -18,20 +18,45 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"time"
 
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer"
+	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer/platform"
+	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
 
 	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
+
+	"github.com/fromanirh/rte-operator/pkg/apply"
+	"github.com/fromanirh/rte-operator/pkg/status"
+)
+
+const (
+	defaultResourceTopologyExporterCrName = "resourcetopologyexporter"
 )
 
 // ResourceTopologyExporterReconciler reconciles a ResourceTopologyExporter object
 type ResourceTopologyExporterReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Log       logr.Logger
+	Scheme    *runtime.Scheme
+	Platform  platform.Platform
+	Manifests rtemanifests.Manifests
+	Helper    *deployer.Helper
+	Namespace string
 }
+
+// TODO: missing permissions (roles, rolebinding, serviceaccount, daemonset...)
 
 //+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=resourcetopologyexporters,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=resourcetopologyexporters/status,verbs=get;update;patch
@@ -39,19 +64,93 @@ type ResourceTopologyExporterReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the ResourceTopologyExporter object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.9.2/pkg/reconcile
 func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	_ = context.Background()
+	logger := r.Log.WithValues("rte", req.NamespacedName)
 
-	// your logic here
+	instance := &topologyexporterv1alpha1.ResourceTopologyExporter{}
+	err := r.Get(context.TODO(), req.NamespacedName, instance)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Return and don't requeue
+			// TODO: we leak
+			// - ServiceAccount
+			return ctrl.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		return ctrl.Result{}, err
+	}
 
-	return ctrl.Result{}, nil
+	if req.Name != defaultResourceTopologyExporterCrName {
+		err := fmt.Errorf("ResourceTopologyExporter resource name must be %q", defaultResourceTopologyExporterCrName)
+		logger.Error(err, "Incorrect ResourceTopologyExporter resource name", "name", req.Name)
+		if err := status.Update(context.TODO(), r.Client, instance, status.ConditionDegraded, "IncorrectResourceTopologyExporterResourceName", fmt.Sprintf("Incorrect ResourceTopologyExporter resource name: %s", req.Name)); err != nil {
+			logger.Error(err, "Failed to update resourcetopologyexporter status", "Desired status", status.ConditionDegraded)
+		}
+		return ctrl.Result{}, nil // Return success to avoid requeue
+	}
+
+	if r.Namespace != req.NamespacedName.Namespace {
+		logger.Info("Updating manifests", "namespace", req.NamespacedName.Namespace)
+		r.Manifests = r.Manifests.Update(rtemanifests.UpdateOptions{
+			Namespace: req.NamespacedName.Namespace,
+		})
+		r.Namespace = req.NamespacedName.Namespace
+	}
+
+	result, condition, err := r.reconcileResource(ctx, req, instance)
+	if condition != "" {
+		errorMsg, wrappedErrMsg := "", ""
+		if err != nil {
+			if errors.Unwrap(err) != nil {
+				wrappedErrMsg = errors.Unwrap(err).Error()
+			}
+		}
+		if err := status.Update(context.TODO(), r.Client, instance, condition, errorMsg, wrappedErrMsg); err != nil {
+			logger.Info("Failed to update resourcetopologyexporter status", "Desired status", status.ConditionAvailable)
+		}
+	}
+	return result, err
+}
+
+func (r *ResourceTopologyExporterReconciler) reconcileResource(ctx context.Context, req ctrl.Request, instance *topologyexporterv1alpha1.ResourceTopologyExporter) (ctrl.Result, string, error) {
+	err := r.syncResourceTopologyExporterResources(instance)
+	if err != nil {
+		return ctrl.Result{}, status.ConditionDegraded, errors.Wrapf(err, "FailedRTESync")
+	}
+
+	ok, err := r.Helper.IsDaemonSetRunning(r.Manifests.DaemonSet.Namespace, r.Manifests.DaemonSet.Name)
+	if err != nil {
+		return ctrl.Result{}, status.ConditionDegraded, err
+	}
+	if !ok {
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, status.ConditionProgressing, nil
+	}
+	return ctrl.Result{}, status.ConditionAvailable, nil
+}
+
+func (r *ResourceTopologyExporterReconciler) syncResourceTopologyExporterResources(instance *topologyexporterv1alpha1.ResourceTopologyExporter) error {
+	logger := r.Log.WithName("RTESync")
+	logger.Info("Start")
+
+	objs := r.Manifests.ToObjects()
+	for _, obj := range objs {
+		if !apply.IsClusterScoped(obj) {
+			// TODO: we leak the ServiceAccount
+			if err := controllerutil.SetControllerReference(instance, obj, r.Scheme); err != nil {
+				return errors.Wrapf(err, "Failed to set controller reference to %s %s", obj.GetNamespace(), obj.GetName())
+			}
+		}
+		if err := apply.ApplyObject(context.TODO(), logger, r.Client, obj); err != nil {
+			return errors.Wrapf(err, "could not apply (%s) %s/%s", obj.GetObjectKind().GroupVersionKind(), obj.GetNamespace(), obj.GetName())
+		}
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

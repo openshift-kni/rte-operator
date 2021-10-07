@@ -4,10 +4,14 @@ go 1.16
 
 require (
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
+	github.com/go-logr/logr v0.4.0
+	github.com/k8stopologyawareschedwg/deployer v0.0.8
 	github.com/k8stopologyawareschedwg/resource-topology-exporter v0.2.3
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
 	github.com/openshift-kni/resource-topology-exporter v0.2.1
+	github.com/pkg/errors v0.9.1
+	k8s.io/api v0.22.2
 	k8s.io/apimachinery v0.22.2
 	k8s.io/client-go v0.22.2
 	sigs.k8s.io/controller-runtime v0.9.2
@@ -40,3 +44,6 @@ replace (
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.22.2
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.22.2
 )
+
+// temporary hack
+replace github.com/k8stopologyawareschedwg/deployer => github.com/fromanirh/deployer v0.0.101
