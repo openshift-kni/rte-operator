@@ -1,0 +1,7 @@
+apiVersion: topologyexporter.openshift-kni.io/v1alpha1
+kind: ResourceTopologyExporter
+metadata:
+  name: resourcetopologyexporter-sample
+spec:
+  # Add fields here
+  foo: bar
