@@ -276,8 +276,6 @@ github.com/francoispqt/gojay v1.2.13/go.mod h1:ehT5mTG4ua4581f1++1WLG0vPdaA9HaiD
 github.com/franela/goblin v0.0.0-20200105215937-c9ffbefa60db/go.mod h1:7dvUGVsVBjqR7JHJk0brhHOZYGmfBYOrK0ZhYMEtBr4=
 github.com/franela/goreq v0.0.0-20171204163338-bcd34c9993f8/go.mod h1:ZhphrRTfi2rbfLwlschooIH4+wKKDR4Pdxhh+TRoA20=
 github.com/frankban/quicktest v1.11.3/go.mod h1:wRf/ReqHper53s+kmmSZizM8NamnL3IM0I9ntUbOk+k=
-github.com/fromanirh/deployer v0.0.101 h1:wXuiNBrRiNL0hD9bPzISQqyfkgFe7AtqhZkKUps1KAA=
-github.com/fromanirh/deployer v0.0.101/go.mod h1:wsX2eybbPfmZz9ExPEoaKUUYDk5DSm1U8EHrh0RPV8M=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
@@ -537,6 +535,8 @@ github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfV
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
 github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8IZAc4RVcycCCAKdM=
 github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5/go.mod h1:7Id9E/uU8ce6rXgefFLlgrJj/GYY22cpxn+r32jIOes=
+github.com/k8stopologyawareschedwg/deployer v0.0.9 h1:QwcevV67EPsmNh5bteEr1I6gmhnfkKCgMVPeOqWJrJg=
+github.com/k8stopologyawareschedwg/deployer v0.0.9/go.mod h1:wsX2eybbPfmZz9ExPEoaKUUYDk5DSm1U8EHrh0RPV8M=
 github.com/k8stopologyawareschedwg/noderesourcetopology-api v0.0.8/go.mod h1:zRoCNg6LjSQewUwnpORw1VT9mP0rGNQlYy4WYaGWvHo=
 github.com/k8stopologyawareschedwg/noderesourcetopology-api v0.0.9/go.mod h1:zRoCNg6LjSQewUwnpORw1VT9mP0rGNQlYy4WYaGWvHo=
 github.com/k8stopologyawareschedwg/noderesourcetopology-api v0.0.10 h1:wHS+TOQfFY67wkS1roZ5WVyihnE/IQmVsD0zzKtzHrU=

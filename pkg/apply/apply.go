@@ -23,62 +23,51 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	"k8s.io/apimachinery/pkg/api/equality"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/types"
-
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/fromanirh/rte-operator/pkg/objectstate"
 )
 
-func getExistingObject(ctx context.Context, log logr.Logger, client k8sclient.Client, obj client.Object) (client.Object, string, error) {
+func describeObject(obj client.Object) (string, error) {
 	name := obj.GetName()
 	namespace := obj.GetNamespace()
 	if name == "" {
-		return nil, "", fmt.Errorf("Object %s has no name", obj.GetObjectKind().GroupVersionKind().String())
+		return "", fmt.Errorf("Object %s has no name", obj.GetObjectKind().GroupVersionKind().String())
 	}
 	gvk := obj.GetObjectKind().GroupVersionKind()
 	// used for logging and errors
-	objDesc := fmt.Sprintf("(%s) %s/%s", gvk.String(), namespace, name)
-	log.Info("reconciling", "object", objDesc)
-
-	// TODO: explain why we can't use client.Object
-	existing := &unstructured.Unstructured{}
-	existing.SetGroupVersionKind(gvk)
-	err := client.Get(ctx, types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}, existing)
-	return existing, objDesc, err
+	return fmt.Sprintf("(%s) %s/%s", gvk.String(), namespace, name), nil
 }
 
-// ApplyObject applies the desired object against the apiserver,
-// merging it with any existing objects if already present.
-func ApplyObject(ctx context.Context, log logr.Logger, client k8sclient.Client, obj client.Object) error {
-	existing, objDesc, err := getExistingObject(ctx, log, client, obj)
+func ApplyObject(ctx context.Context, log logr.Logger, client k8sclient.Client, objState objectstate.ObjectState) error {
+	objDesc, _ := describeObject(objState.Desired)
 
-	if err != nil && apierrors.IsNotFound(err) {
+	if objState.IsNotFoundError() {
 		log.Info("creating", "object", objDesc)
-		err := client.Create(ctx, obj)
+		err := client.Create(ctx, objState.Desired)
 		if err != nil {
 			return err
 		}
 		log.Info("created", "object", objDesc)
-	}
-
-	if existing == nil {
 		return nil
 	}
 
 	// Merge the desired object with what actually exists
-	if err := MergeObjectForUpdate(existing, obj); err != nil {
+	updated, err := objState.Merge(objState.Existing, objState.Desired)
+	if err != nil {
 		return errors.Wrapf(err, "could not merge object %s with existing", objDesc)
 	}
-	if !equality.Semantic.DeepEqual(existing, obj) {
+	ok, err := objState.Compare(objState.Existing, updated)
+	if err != nil {
+		return errors.Wrapf(err, "could not compare object %s with existing", objDesc)
+	}
+	if !ok {
 		log.Info("updating", "object", objDesc)
-		if err := client.Update(ctx, obj); err != nil {
+		if err := client.Update(ctx, updated); err != nil {
 			return errors.Wrapf(err, "could not update object %s", objDesc)
 		}
 		log.Info("updated", "object", objDesc)
 	}
-
 	return nil
 }
