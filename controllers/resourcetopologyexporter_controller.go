@@ -78,8 +78,6 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
-			// TODO: we leak
-			// - ServiceAccount
 			return ctrl.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
@@ -140,11 +138,8 @@ func (r *ResourceTopologyExporterReconciler) syncResourceTopologyExporterResourc
 
 	objs := r.Manifests.ToObjects()
 	for _, obj := range objs {
-		if !apply.IsClusterScoped(obj) {
-			// TODO: we leak the ServiceAccount
-			if err := controllerutil.SetControllerReference(instance, obj, r.Scheme); err != nil {
-				return errors.Wrapf(err, "Failed to set controller reference to %s %s", obj.GetNamespace(), obj.GetName())
-			}
+		if err := controllerutil.SetControllerReference(instance, obj, r.Scheme); err != nil {
+			return errors.Wrapf(err, "Failed to set controller reference to %s %s", obj.GetNamespace(), obj.GetName())
 		}
 		if err := apply.ApplyObject(context.TODO(), logger, r.Client, obj); err != nil {
 			return errors.Wrapf(err, "could not apply (%s) %s/%s", obj.GetObjectKind().GroupVersionKind(), obj.GetNamespace(), obj.GetName())

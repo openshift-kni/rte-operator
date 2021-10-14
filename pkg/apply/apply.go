@@ -23,7 +23,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -82,11 +81,4 @@ func ApplyObject(ctx context.Context, log logr.Logger, client k8sclient.Client, 
 	}
 
 	return nil
-}
-
-func IsClusterScoped(obj client.Object) bool {
-	if _, ok := obj.(*corev1.ServiceAccount); ok {
-		return true
-	}
-	return false
 }
