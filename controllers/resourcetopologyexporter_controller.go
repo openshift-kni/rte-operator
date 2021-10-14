@@ -33,6 +33,7 @@ import (
 
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer/platform"
+	apimanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/api"
 	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
 
 	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
@@ -48,12 +49,13 @@ const (
 // ResourceTopologyExporterReconciler reconciles a ResourceTopologyExporter object
 type ResourceTopologyExporterReconciler struct {
 	client.Client
-	Log       logr.Logger
-	Scheme    *runtime.Scheme
-	Platform  platform.Platform
-	Manifests rtemanifests.Manifests
-	Helper    *deployer.Helper
-	Namespace string
+	Log          logr.Logger
+	Scheme       *runtime.Scheme
+	Platform     platform.Platform
+	APIManifests apimanifests.Manifests
+	RTEManifests rtemanifests.Manifests
+	Helper       *deployer.Helper
+	Namespace    string
 }
 
 // TODO: missing permissions (roles, rolebinding, serviceaccount, daemonset...)
@@ -93,9 +95,10 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 		return ctrl.Result{}, nil // Return success to avoid requeue
 	}
 
+	// note we intentionally NOT update the APIManifests - it is expected to be a NOP anyway
 	if r.Namespace != req.NamespacedName.Namespace {
 		logger.Info("Updating manifests", "namespace", req.NamespacedName.Namespace)
-		r.Manifests = r.Manifests.Update(rtemanifests.UpdateOptions{
+		r.RTEManifests = r.RTEManifests.Update(rtemanifests.UpdateOptions{
 			Namespace: req.NamespacedName.Namespace,
 		})
 		r.Namespace = req.NamespacedName.Namespace
@@ -117,12 +120,18 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 }
 
 func (r *ResourceTopologyExporterReconciler) reconcileResource(ctx context.Context, req ctrl.Request, instance *topologyexporterv1alpha1.ResourceTopologyExporter) (ctrl.Result, string, error) {
-	err := r.syncResourceTopologyExporterResources(instance)
+	var err error
+
+	err = r.syncNodeResourceTopologyAPI(instance)
+	if err != nil {
+		return ctrl.Result{}, status.ConditionDegraded, errors.Wrapf(err, "FailedAPISync")
+	}
+	err = r.syncResourceTopologyExporterResources(instance)
 	if err != nil {
 		return ctrl.Result{}, status.ConditionDegraded, errors.Wrapf(err, "FailedRTESync")
 	}
 
-	ok, err := r.Helper.IsDaemonSetRunning(r.Manifests.DaemonSet.Namespace, r.Manifests.DaemonSet.Name)
+	ok, err := r.Helper.IsDaemonSetRunning(r.RTEManifests.DaemonSet.Namespace, r.RTEManifests.DaemonSet.Name)
 	if err != nil {
 		return ctrl.Result{}, status.ConditionDegraded, err
 	}
@@ -132,12 +141,23 @@ func (r *ResourceTopologyExporterReconciler) reconcileResource(ctx context.Conte
 	return ctrl.Result{}, status.ConditionAvailable, nil
 }
 
+func (r *ResourceTopologyExporterReconciler) syncNodeResourceTopologyAPI(instance *topologyexporterv1alpha1.ResourceTopologyExporter) error {
+	logger := r.Log.WithName("APISync")
+	logger.Info("Start")
+
+	for _, obj := range r.APIManifests.ToObjects() {
+		if err := apply.CreateObject(context.TODO(), logger, r.Client, obj); err != nil {
+			return errors.Wrapf(err, "could not create %s", obj.GetObjectKind().GroupVersionKind().String())
+		}
+	}
+	return nil
+}
+
 func (r *ResourceTopologyExporterReconciler) syncResourceTopologyExporterResources(instance *topologyexporterv1alpha1.ResourceTopologyExporter) error {
 	logger := r.Log.WithName("RTESync")
 	logger.Info("Start")
 
-	objs := r.Manifests.ToObjects()
-	for _, obj := range objs {
+	for _, obj := range r.RTEManifests.ToObjects() {
 		if err := controllerutil.SetControllerReference(instance, obj, r.Scheme); err != nil {
 			return errors.Wrapf(err, "Failed to set controller reference to %s %s", obj.GetNamespace(), obj.GetName())
 		}

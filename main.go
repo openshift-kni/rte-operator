@@ -39,6 +39,7 @@ import (
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer/platform"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer/platform/detect"
+	apimanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/api"
 	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/tlog"
 	//+kubebuilder:scaffold:imports
@@ -84,9 +85,16 @@ func main() {
 	}
 	setupLog.Info("detected cluster", "platform", clusterPlatform)
 
-	manifests, err := rtemanifests.GetManifests(clusterPlatform)
+	apiManifests, err := apimanifests.GetManifests(clusterPlatform)
 	if err != nil {
-		setupLog.Error(err, "unable to load manifests")
+		setupLog.Error(err, "unable to load the API manifests")
+		os.Exit(1)
+	}
+	setupLog.Info("API manifests loaded")
+
+	rteManifests, err := rtemanifests.GetManifests(clusterPlatform)
+	if err != nil {
+		setupLog.Error(err, "unable to load the RTE manifests")
 		os.Exit(1)
 	}
 	setupLog.Info("RTE manifests loaded")
@@ -107,12 +115,13 @@ func main() {
 	}
 
 	if err = (&controllers.ResourceTopologyExporterReconciler{
-		Client:    mgr.GetClient(),
-		Scheme:    mgr.GetScheme(),
-		Log:       ctrl.Log.WithName("controllers").WithName("RTE"),
-		Manifests: manifests,
-		Platform:  clusterPlatform,
-		Helper:    deployer.NewHelperWithClient(mgr.GetClient(), "", tlog.NewNullLogAdapter()),
+		Client:       mgr.GetClient(),
+		Scheme:       mgr.GetScheme(),
+		Log:          ctrl.Log.WithName("controllers").WithName("RTE"),
+		APIManifests: apiManifests,
+		RTEManifests: rteManifests,
+		Platform:     clusterPlatform,
+		Helper:       deployer.NewHelperWithClient(mgr.GetClient(), "", tlog.NewNullLogAdapter()),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ResourceTopologyExporter")
 		os.Exit(1)

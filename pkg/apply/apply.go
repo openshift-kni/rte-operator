@@ -50,8 +50,30 @@ func getExistingObject(ctx context.Context, log logr.Logger, client k8sclient.Cl
 	return existing, objDesc, err
 }
 
-// ApplyObject applies the desired object against the apiserver,
-// merging it with any existing objects if already present.
+func CreateObject(ctx context.Context, log logr.Logger, client k8sclient.Client, obj client.Object) error {
+	existing, objDesc, err := getExistingObject(ctx, log, client, obj)
+
+	if err != nil && apierrors.IsNotFound(err) {
+		log.Info("creating", "object", objDesc)
+		err := client.Create(ctx, obj)
+		if err != nil {
+			return err
+		}
+		log.Info("created", "object", objDesc)
+	}
+
+	// TODO: how come?
+	if existing == nil {
+		return nil
+	}
+
+	if !equality.Semantic.DeepEqual(existing, obj) {
+		return fmt.Errorf("object %q already existing, but semantically different", obj.GetObjectKind().GroupVersionKind().String())
+	}
+	return nil
+
+}
+
 func ApplyObject(ctx context.Context, log logr.Logger, client k8sclient.Client, obj client.Object) error {
 	existing, objDesc, err := getExistingObject(ctx, log, client, obj)
 
@@ -64,6 +86,7 @@ func ApplyObject(ctx context.Context, log logr.Logger, client k8sclient.Client, 
 		log.Info("created", "object", objDesc)
 	}
 
+	// TODO: how come?
 	if existing == nil {
 		return nil
 	}
