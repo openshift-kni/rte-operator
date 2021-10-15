@@ -33,8 +33,11 @@ import (
 
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer/platform"
-	apimanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/api"
-	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
+
+	//	apimanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/api"
+	//	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
+	apimanifests "github.com/fromanirh/rte-operator/pkg/manifests/api"
+	rtemanifests "github.com/fromanirh/rte-operator/pkg/manifests/rte"
 
 	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
 
@@ -121,7 +124,6 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 
 func (r *ResourceTopologyExporterReconciler) reconcileResource(ctx context.Context, req ctrl.Request, instance *topologyexporterv1alpha1.ResourceTopologyExporter) (ctrl.Result, string, error) {
 	var err error
-
 	err = r.syncNodeResourceTopologyAPI(instance)
 	if err != nil {
 		return ctrl.Result{}, status.ConditionDegraded, errors.Wrapf(err, "FailedAPISync")
@@ -130,7 +132,6 @@ func (r *ResourceTopologyExporterReconciler) reconcileResource(ctx context.Conte
 	if err != nil {
 		return ctrl.Result{}, status.ConditionDegraded, errors.Wrapf(err, "FailedRTESync")
 	}
-
 	ok, err := r.Helper.IsDaemonSetRunning(r.RTEManifests.DaemonSet.Namespace, r.RTEManifests.DaemonSet.Name)
 	if err != nil {
 		return ctrl.Result{}, status.ConditionDegraded, err
@@ -145,9 +146,11 @@ func (r *ResourceTopologyExporterReconciler) syncNodeResourceTopologyAPI(instanc
 	logger := r.Log.WithName("APISync")
 	logger.Info("Start")
 
-	for _, obj := range r.APIManifests.ToObjects() {
-		if err := apply.CreateObject(context.TODO(), logger, r.Client, obj); err != nil {
-			return errors.Wrapf(err, "could not create %s", obj.GetObjectKind().GroupVersionKind().String())
+	Existing := r.APIManifests.FromClient(context.TODO(), r.Client)
+
+	for _, objState := range Existing.State(r.APIManifests) {
+		if err := apply.ApplyObject(context.TODO(), logger, r.Client, objState); err != nil {
+			return errors.Wrapf(err, "could not create %s", objState.Desired.GetObjectKind().GroupVersionKind().String())
 		}
 	}
 	return nil
@@ -157,12 +160,14 @@ func (r *ResourceTopologyExporterReconciler) syncResourceTopologyExporterResourc
 	logger := r.Log.WithName("RTESync")
 	logger.Info("Start")
 
-	for _, obj := range r.RTEManifests.ToObjects() {
-		if err := controllerutil.SetControllerReference(instance, obj, r.Scheme); err != nil {
-			return errors.Wrapf(err, "Failed to set controller reference to %s %s", obj.GetNamespace(), obj.GetName())
+	Existing := r.RTEManifests.FromClient(context.TODO(), r.Client)
+
+	for _, objState := range Existing.State(r.RTEManifests) {
+		if err := controllerutil.SetControllerReference(instance, objState.Desired, r.Scheme); err != nil {
+			return errors.Wrapf(err, "Failed to set controller reference to %s %s", objState.Desired.GetNamespace(), objState.Desired.GetName())
 		}
-		if err := apply.ApplyObject(context.TODO(), logger, r.Client, obj); err != nil {
-			return errors.Wrapf(err, "could not apply (%s) %s/%s", obj.GetObjectKind().GroupVersionKind(), obj.GetNamespace(), obj.GetName())
+		if err := apply.ApplyObject(context.TODO(), logger, r.Client, objState); err != nil {
+			return errors.Wrapf(err, "could not apply (%s) %s/%s", objState.Desired.GetObjectKind().GroupVersionKind(), objState.Desired.GetNamespace(), objState.Desired.GetName())
 		}
 	}
 	return nil
