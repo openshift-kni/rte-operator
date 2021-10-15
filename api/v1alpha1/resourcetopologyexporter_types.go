@@ -26,7 +26,7 @@ type ResourceTopologyExporterSpec struct {
 
 // ResourceTopologyExporterStatus defines the observed state of ResourceTopologyExporter
 type ResourceTopologyExporterStatus struct {
-	// Conditions show the current state of the MetalLB Operator
+	// Conditions show the current state of the ResourceTopologyExporter Operator
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
