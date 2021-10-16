@@ -21,8 +21,11 @@ jobs:
       with:
         go-version: 1.16
 
-    - name: Build
-      run: make
+    - name: Build operand
+      run: make build
+
+    - name: Build operator
+      run: make build-rte
 
     - name: Test
       run: make test
