@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
-	github.com/drone/envsubst v1.0.3
 	github.com/go-logr/logr v0.4.0
 	github.com/k8stopologyawareschedwg/deployer v0.0.8
 	github.com/k8stopologyawareschedwg/resource-topology-exporter v0.2.3
@@ -13,12 +12,9 @@ require (
 	github.com/openshift-kni/resource-topology-exporter v0.2.1
 	github.com/pkg/errors v0.9.1
 	k8s.io/api v0.22.2
-	k8s.io/apiextensions-apiserver v0.21.2
 	k8s.io/apimachinery v0.22.2
 	k8s.io/client-go v0.22.2
-	k8s.io/kube-scheduler v0.21.0
 	sigs.k8s.io/controller-runtime v0.9.2
-	sigs.k8s.io/scheduler-plugins v0.19.9
 )
 
 replace (
@@ -50,4 +46,4 @@ replace (
 )
 
 // temporary hack
-replace github.com/k8stopologyawareschedwg/deployer => github.com/fromanirh/deployer v0.0.106
+replace github.com/k8stopologyawareschedwg/deployer => github.com/fromanirh/deployer v0.0.101
