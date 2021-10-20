@@ -13,6 +13,8 @@ spec:
     kind: ResourceTopologyExporter
     listKind: ResourceTopologyExporterList
     plural: resourcetopologyexporters
+    shortNames:
+    - rte
     singular: resourcetopologyexporter
   scope: Namespaced
   versions:

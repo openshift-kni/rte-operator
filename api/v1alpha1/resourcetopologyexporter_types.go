@@ -32,6 +32,7 @@ type ResourceTopologyExporterStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:shortName=rte,path=resourcetopologyexporters
 
 // ResourceTopologyExporter is the Schema for the resourcetopologyexporters API
 type ResourceTopologyExporter struct {
