@@ -4,9 +4,8 @@ go 1.16
 
 require (
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
-	github.com/drone/envsubst v1.0.3
 	github.com/go-logr/logr v0.4.0
-	github.com/k8stopologyawareschedwg/deployer v0.0.9
+	github.com/k8stopologyawareschedwg/deployer v0.0.10
 	github.com/k8stopologyawareschedwg/resource-topology-exporter v0.2.3
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
@@ -16,9 +15,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.21.2
 	k8s.io/apimachinery v0.22.2
 	k8s.io/client-go v0.22.2
-	k8s.io/kube-scheduler v0.21.0
 	sigs.k8s.io/controller-runtime v0.9.2
-	sigs.k8s.io/scheduler-plugins v0.19.9
 )
 
 replace (
