@@ -90,6 +90,9 @@ vet: ## Run go vet against code.
 test: manifests generate fmt vet envtest ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -coverprofile cover.out
 
+test-unit: manifests generate fmt vet envtest
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./controllers/... ./pkg/...
+
 ##@ Build
 
 build: generate fmt vet ## Build manager binary.
@@ -97,6 +100,9 @@ build: generate fmt vet ## Build manager binary.
 
 build-rte: fmt vet
 	go build -o bin/rte rte/main.go
+
+build-e2e: fmt vet
+	go test -v -c -o bin/e2e.test ./test/e2e/
 
 run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./main.go

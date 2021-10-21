@@ -6,7 +6,7 @@ require (
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
 	github.com/go-logr/logr v0.4.0
 	github.com/k8stopologyawareschedwg/deployer v0.0.10
-	github.com/k8stopologyawareschedwg/resource-topology-exporter v0.2.3
+	github.com/k8stopologyawareschedwg/resource-topology-exporter v0.2.4
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
 	github.com/openshift-kni/resource-topology-exporter v0.2.1
@@ -15,10 +15,14 @@ require (
 	k8s.io/apiextensions-apiserver v0.21.2
 	k8s.io/apimachinery v0.22.2
 	k8s.io/client-go v0.22.2
+	k8s.io/kubernetes v1.22.1
 	sigs.k8s.io/controller-runtime v0.9.2
 )
 
 replace (
+	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
+	golang.org/x/text => golang.org/x/text v0.3.5
+	google.golang.org/grpc => google.golang.org/grpc v1.38.0
 	k8s.io/api => k8s.io/api v0.22.2
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.22.2
 	k8s.io/apimachinery => k8s.io/apimachinery v0.22.2
@@ -44,4 +48,9 @@ replace (
 	k8s.io/mount-utils => k8s.io/mount-utils v0.22.2
 	k8s.io/pod-security-admission => k8s.io/pod-security-admission v0.22.2
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.22.2
+)
+
+replace (
+	github.com/onsi/ginkgo => github.com/onsi/ginkgo v1.14.0
+	github.com/onsi/gomega => github.com/onsi/gomega v1.10.1
 )

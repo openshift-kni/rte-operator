@@ -27,5 +27,5 @@ jobs:
     - name: Build operator
       run: make build-rte
 
-    - name: Test
-      run: make test
+    - name: Run unit tests
+      run: make test-unit
