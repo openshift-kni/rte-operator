@@ -14,18 +14,15 @@ COPY main.go main.go
 COPY api/ api/
 COPY controllers/ controllers/
 COPY pkg/ pkg/
-COPY rte/ rte/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager main.go
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o rte rte/main.go
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal
-COPY --from=builder /workspace/manager /bin/rte-operator
-# bundle the operand, and use a backward compatible name for RTE
-COPY --from=builder /workspace/rte /bin/resource-topology-exporter
-RUN mkdir /etc/resource-topology-exporter/ && \
-    touch /etc/resource-topology-exporter/config.yaml
-RUN microdnf install pciutils
+# Use distroless as minimal base image to package the manager binary
+# Refer to https://github.com/GoogleContainerTools/distroless for more details
+FROM gcr.io/distroless/static:nonroot
+WORKDIR /
+COPY --from=builder /workspace/manager .
 USER 65532:65532
-ENTRYPOINT ["/bin/rte-operator"]
+
+ENTRYPOINT ["/manager"]
