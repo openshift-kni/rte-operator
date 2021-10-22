@@ -18,12 +18,12 @@ COPY rte/ rte/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager main.go
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o rte rte/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o exporter rte/main.go
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal
 COPY --from=builder /workspace/manager /bin/rte-operator
 # bundle the operand, and use a backward compatible name for RTE
-COPY --from=builder /workspace/rte /bin/resource-topology-exporter
+COPY --from=builder /workspace/exporter /bin/resource-topology-exporter
 RUN mkdir /etc/resource-topology-exporter/ && \
     touch /etc/resource-topology-exporter/config.yaml
 RUN microdnf install pciutils
