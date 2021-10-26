@@ -16,7 +16,9 @@
 
 package images
 
-import "os"
+import (
+	"os"
+)
 
 func init() {
 	if rteImage, ok := os.LookupEnv("TAS_RESOURCE_EXPORTER_IMAGE"); ok {

@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -36,6 +37,7 @@ import (
 
 	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
 	"github.com/fromanirh/rte-operator/controllers"
+	"github.com/fromanirh/rte-operator/pkg/images"
 	"github.com/go-logr/logr"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer/platform"
@@ -117,6 +119,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	imageSpec, err := images.GetCurrentImage(mgr.GetClient(), context.Background())
+	if err != nil {
+		// intentionally continue
+		setupLog.Info("unable to find current image, using hardcoded", "error", err)
+	}
+	setupLog.Info("using RTE image", "spec", imageSpec)
+
 	if err = (&controllers.ResourceTopologyExporterReconciler{
 		Client:       mgr.GetClient(),
 		Scheme:       mgr.GetScheme(),
@@ -125,6 +134,7 @@ func main() {
 		RTEManifests: rteManifests,
 		Platform:     clusterPlatform,
 		Helper:       deployer.NewHelperWithClient(mgr.GetClient(), "", tlog.NewNullLogAdapter()),
+		ImageSpec:    imageSpec,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ResourceTopologyExporter")
 		os.Exit(1)
