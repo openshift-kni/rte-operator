@@ -27,6 +27,8 @@ import (
 	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
+
 	"github.com/fromanirh/rte-operator/pkg/objectstate"
 	"github.com/fromanirh/rte-operator/pkg/objectstate/compare"
 	"github.com/fromanirh/rte-operator/pkg/objectstate/merge"
@@ -120,4 +122,13 @@ func FromClient(ctx context.Context, cli client.Client, plat platform.Platform, 
 		}
 	}
 	return ret
+}
+
+func NamespacedNameFromObject(obj client.Object) (topologyexporterv1alpha1.NamespacedName, bool) {
+	res := topologyexporterv1alpha1.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      obj.GetName(),
+	}
+	_, ok := obj.(*appsv1.DaemonSet)
+	return res, ok
 }

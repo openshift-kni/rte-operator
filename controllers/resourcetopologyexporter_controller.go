@@ -41,6 +41,7 @@ import (
 
 	"github.com/fromanirh/rte-operator/pkg/apply"
 	apistate "github.com/fromanirh/rte-operator/pkg/objectstate/api"
+	"github.com/fromanirh/rte-operator/pkg/objectstate/rte"
 	rtestate "github.com/fromanirh/rte-operator/pkg/objectstate/rte"
 	"github.com/fromanirh/rte-operator/pkg/status"
 )
@@ -109,17 +110,23 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 
 	result, condition, err := r.reconcileResource(ctx, req, instance)
 	if condition != "" {
-		errorMsg, wrappedErrMsg := "", ""
-		if err != nil {
-			if errors.Unwrap(err) != nil {
-				wrappedErrMsg = errors.Unwrap(err).Error()
-			}
-		}
-		if err := status.Update(context.TODO(), r.Client, instance, condition, errorMsg, wrappedErrMsg); err != nil {
-			logger.Info("Failed to update resourcetopologyexporter status", "Desired status", status.ConditionAvailable)
+		reason, message := "", messageFromError(err)
+		if err := status.Update(context.TODO(), r.Client, instance, condition, reason, message); err != nil {
+			logger.Info("Failed to update resourcetopologyexporter status", "Desired condition", condition)
 		}
 	}
 	return result, err
+}
+
+func messageFromError(err error) string {
+	if err == nil {
+		return ""
+	}
+	unwErr := errors.Unwrap(err)
+	if unwErr == nil {
+		return ""
+	}
+	return unwErr.Error()
 }
 
 func (r *ResourceTopologyExporterReconciler) reconcileResource(ctx context.Context, req ctrl.Request, instance *topologyexporterv1alpha1.ResourceTopologyExporter) (ctrl.Result, string, error) {
@@ -128,17 +135,20 @@ func (r *ResourceTopologyExporterReconciler) reconcileResource(ctx context.Conte
 	if err != nil {
 		return ctrl.Result{}, status.ConditionDegraded, errors.Wrapf(err, "FailedAPISync")
 	}
-	err = r.syncResourceTopologyExporterResources(instance)
+
+	dsInfo, err := r.syncResourceTopologyExporterResources(instance)
 	if err != nil {
 		return ctrl.Result{}, status.ConditionDegraded, errors.Wrapf(err, "FailedRTESync")
 	}
-	ok, err := r.Helper.IsDaemonSetRunning(r.RTEManifests.DaemonSet.Namespace, r.RTEManifests.DaemonSet.Name)
+	ok, err := r.Helper.IsDaemonSetRunning(dsInfo.Namespace, dsInfo.Name)
 	if err != nil {
 		return ctrl.Result{}, status.ConditionDegraded, err
 	}
 	if !ok {
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, status.ConditionProgressing, nil
 	}
+
+	instance.Status.DaemonSet = &dsInfo
 	return ctrl.Result{}, status.ConditionAvailable, nil
 }
 
@@ -149,28 +159,34 @@ func (r *ResourceTopologyExporterReconciler) syncNodeResourceTopologyAPI(instanc
 	Existing := apistate.FromClient(context.TODO(), r.Client, r.Platform, r.APIManifests)
 
 	for _, objState := range Existing.State(r.APIManifests) {
-		if err := apply.ApplyObject(context.TODO(), logger, r.Client, objState); err != nil {
+		if _, err := apply.ApplyObject(context.TODO(), logger, r.Client, objState); err != nil {
 			return errors.Wrapf(err, "could not create %s", objState.Desired.GetObjectKind().GroupVersionKind().String())
 		}
 	}
 	return nil
 }
 
-func (r *ResourceTopologyExporterReconciler) syncResourceTopologyExporterResources(instance *topologyexporterv1alpha1.ResourceTopologyExporter) error {
+func (r *ResourceTopologyExporterReconciler) syncResourceTopologyExporterResources(instance *topologyexporterv1alpha1.ResourceTopologyExporter) (topologyexporterv1alpha1.NamespacedName, error) {
 	logger := r.Log.WithName("RTESync")
 	logger.Info("Start")
 
 	Existing := rtestate.FromClient(context.TODO(), r.Client, r.Platform, r.RTEManifests)
 
+	res := topologyexporterv1alpha1.NamespacedName{}
 	for _, objState := range Existing.State(r.RTEManifests) {
 		if err := controllerutil.SetControllerReference(instance, objState.Desired, r.Scheme); err != nil {
-			return errors.Wrapf(err, "Failed to set controller reference to %s %s", objState.Desired.GetNamespace(), objState.Desired.GetName())
+			return res, errors.Wrapf(err, "Failed to set controller reference to %s %s", objState.Desired.GetNamespace(), objState.Desired.GetName())
 		}
-		if err := apply.ApplyObject(context.TODO(), logger, r.Client, objState); err != nil {
-			return errors.Wrapf(err, "could not apply (%s) %s/%s", objState.Desired.GetObjectKind().GroupVersionKind(), objState.Desired.GetNamespace(), objState.Desired.GetName())
+		obj, err := apply.ApplyObject(context.TODO(), logger, r.Client, objState)
+		if err != nil {
+			return res, errors.Wrapf(err, "could not apply (%s) %s/%s", objState.Desired.GetObjectKind().GroupVersionKind(), objState.Desired.GetNamespace(), objState.Desired.GetName())
+		}
+
+		if nname, ok := rte.NamespacedNameFromObject(obj); ok {
+			res = nname
 		}
 	}
-	return nil
+	return res, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

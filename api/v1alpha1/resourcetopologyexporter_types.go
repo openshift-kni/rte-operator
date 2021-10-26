@@ -20,12 +20,33 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// NamespacedName comprises a resource name, with a mandatory namespace,
+// rendered as "<namespace>/<name>". This is borrowed from the kubernetes
+// source, because controller-gen complains about the kube native type:
+// encountered struct field "Namespace" without JSON tag in type "NamespacedName"
+// at least until kube catches up, we just inline this simple struct here.
+type NamespacedName struct {
+	Namespace string `json:"namespace,omitempty"`
+	Name      string `json:"name,omitempty"`
+}
+
+const (
+	Separator = '/'
+)
+
+// String returns the general purpose string representation
+func (n NamespacedName) String() string {
+	return n.Namespace + string(Separator) + n.Name
+}
+
 // ResourceTopologyExporterSpec defines the desired state of ResourceTopologyExporter
 type ResourceTopologyExporterSpec struct {
 }
 
 // ResourceTopologyExporterStatus defines the observed state of ResourceTopologyExporter
 type ResourceTopologyExporterStatus struct {
+	DaemonSet *NamespacedName `json:"daemonset,omitempty"`
+
 	// Conditions show the current state of the ResourceTopologyExporter Operator
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }

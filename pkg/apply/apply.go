@@ -40,34 +40,34 @@ func describeObject(obj client.Object) (string, error) {
 	return fmt.Sprintf("(%s) %s/%s", gvk.String(), namespace, name), nil
 }
 
-func ApplyObject(ctx context.Context, log logr.Logger, client k8sclient.Client, objState objectstate.ObjectState) error {
+func ApplyObject(ctx context.Context, log logr.Logger, client k8sclient.Client, objState objectstate.ObjectState) (client.Object, error) {
 	objDesc, _ := describeObject(objState.Desired)
 
 	if objState.IsNotFoundError() {
 		log.Info("creating", "object", objDesc)
 		err := client.Create(ctx, objState.Desired)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		log.Info("created", "object", objDesc)
-		return nil
+		return objState.Desired, nil
 	}
 
 	// Merge the desired object with what actually exists
 	updated, err := objState.Merge(objState.Existing, objState.Desired)
 	if err != nil {
-		return errors.Wrapf(err, "could not merge object %s with existing", objDesc)
+		return nil, errors.Wrapf(err, "could not merge object %s with existing", objDesc)
 	}
 	ok, err := objState.Compare(objState.Existing, updated)
 	if err != nil {
-		return errors.Wrapf(err, "could not compare object %s with existing", objDesc)
+		return nil, errors.Wrapf(err, "could not compare object %s with existing", objDesc)
 	}
 	if !ok {
 		log.Info("updating", "object", objDesc)
 		if err := client.Update(ctx, updated); err != nil {
-			return errors.Wrapf(err, "could not update object %s", objDesc)
+			return nil, errors.Wrapf(err, "could not update object %s", objDesc)
 		}
 		log.Info("updated", "object", objDesc)
 	}
-	return nil
+	return updated, nil
 }
