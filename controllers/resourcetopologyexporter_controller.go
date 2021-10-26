@@ -110,9 +110,10 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 
 	result, condition, err := r.reconcileResource(ctx, req, instance)
 	if condition != "" {
-		reason, message := "", messageFromError(err)
+		// TODO: use proper reason
+		reason, message := condition, messageFromError(err)
 		if err := status.Update(context.TODO(), r.Client, instance, condition, reason, message); err != nil {
-			logger.Info("Failed to update resourcetopologyexporter status", "Desired condition", condition)
+			logger.Info("Failed to update resourcetopologyexporter status", "Desired condition", condition, "error", err)
 		}
 	}
 	return result, err

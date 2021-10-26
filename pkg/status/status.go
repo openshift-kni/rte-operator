@@ -46,7 +46,7 @@ func Update(ctx context.Context, client k8sclient.Client, rte *topologyexporterv
 	rte.Status.Conditions = getConditions(condition, reason, message)
 
 	if err := client.Status().Update(ctx, rte); err != nil {
-		return errors.Wrapf(err, "could not update status for object %+v", rte)
+		return errors.Wrapf(err, "could not update status for object %s", k8sclient.ObjectKeyFromObject(rte))
 	}
 	return nil
 }
