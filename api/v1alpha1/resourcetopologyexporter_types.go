@@ -20,11 +20,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NamespacedName comprises a resource name, with a mandatory namespace,
-// rendered as "<namespace>/<name>". This is borrowed from the kubernetes
-// source, because controller-gen complains about the kube native type:
+// This is borrowed from the kubernetes source, because controller-gen
+// complains about the kube native type:
 // encountered struct field "Namespace" without JSON tag in type "NamespacedName"
 // at least until kube catches up, we just inline this simple struct here.
+
+// NamespacedName comprises a resource name, with a mandatory namespace,
+// rendered as "<namespace>/<name>".
 type NamespacedName struct {
 	Namespace string `json:"namespace,omitempty"`
 	Name      string `json:"name,omitempty"`
