@@ -40,6 +40,7 @@ import (
 	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
 
 	"github.com/fromanirh/rte-operator/pkg/apply"
+	"github.com/fromanirh/rte-operator/pkg/images"
 	apistate "github.com/fromanirh/rte-operator/pkg/objectstate/api"
 	"github.com/fromanirh/rte-operator/pkg/objectstate/rte"
 	rtestate "github.com/fromanirh/rte-operator/pkg/objectstate/rte"
@@ -105,6 +106,7 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 		r.RTEManifests = r.RTEManifests.Update(rtemanifests.UpdateOptions{
 			Namespace: req.NamespacedName.Namespace,
 		})
+		rtestate.UpdateDaemonSetImage(r.RTEManifests.DaemonSet, images.ResourceTopologyExporterImage)
 		r.Namespace = req.NamespacedName.Namespace
 	}
 

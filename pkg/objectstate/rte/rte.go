@@ -132,3 +132,9 @@ func NamespacedNameFromObject(obj client.Object) (topologyexporterv1alpha1.Names
 	_, ok := obj.(*appsv1.DaemonSet)
 	return res, ok
 }
+
+func UpdateDaemonSetImage(ds *appsv1.DaemonSet, pullSpec string) *appsv1.DaemonSet {
+	// TODO: better match by name than assume container#0 is RTE proper (not minion)
+	ds.Spec.Template.Spec.Containers[0].Image = pullSpec
+	return ds
+}
