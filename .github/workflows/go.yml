@@ -21,11 +21,14 @@ jobs:
       with:
         go-version: 1.16
 
+    - name: Check style
+      run: make vet  # TODO: enforce format check
+
     - name: Build operand
-      run: make build
+      run: make binary
 
     - name: Build operator
-      run: make build-rte
+      run: make binary-rte
 
     - name: Run unit tests
       run: make test-unit

@@ -95,14 +95,20 @@ test-unit: manifests generate fmt vet envtest
 
 ##@ Build
 
-build: generate fmt vet ## Build manager binary.
+binary:
 	go build -o bin/manager main.go
 
-build-rte: fmt vet
+binary-rte:
 	go build -o bin/rte rte/main.go
 
-build-e2e: fmt vet
+binary-e2e:
 	go test -v -c -o bin/e2e.test ./test/e2e
+
+build: generate fmt vet binary
+
+build-rte: fmt vet binary-rte
+
+build-e2e: fmt vet binary-e2e
 
 run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./main.go
