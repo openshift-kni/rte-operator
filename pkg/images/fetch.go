@@ -56,10 +56,6 @@ func GetImageFromPod(cli client.Client, ctx context.Context, namespace, podName,
 		return "", err
 	}
 
-	if containerName == "" {
-		containerName = pod.Spec.Containers[0].Name
-	}
-
 	cnt, err := findContainerByName(&pod, containerName)
 	if err != nil {
 		return "", err
@@ -69,6 +65,10 @@ func GetImageFromPod(cli client.Client, ctx context.Context, namespace, podName,
 }
 
 func findContainerByName(pod *corev1.Pod, containerName string) (*corev1.Container, error) {
+	if containerName == "" {
+		return &pod.Spec.Containers[0], nil
+	}
+
 	for idx := 0; idx < len(pod.Spec.Containers); idx++ {
 		cnt := &pod.Spec.Containers[idx]
 		if cnt.Name == containerName {
