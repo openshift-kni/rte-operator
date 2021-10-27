@@ -102,7 +102,7 @@ build-rte: fmt vet
 	go build -o bin/rte rte/main.go
 
 build-e2e: fmt vet
-	go test -v -c -o bin/e2e.test ./test/e2e/
+	go test -v -c -o bin/e2e.test ./test/e2e
 
 run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./main.go
@@ -127,7 +127,6 @@ deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in
 
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | kubectl delete -f -
-
 
 CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
 controller-gen: ## Download controller-gen locally if necessary.
