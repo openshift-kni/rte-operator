@@ -1,0 +1,5 @@
+apiVersion: topologyexporter.openshift-kni.io/v1alpha1
+kind: ResourceTopologyExporter
+metadata:
+  name: resourcetopologyexporter
+spec: {}
