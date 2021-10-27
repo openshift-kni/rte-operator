@@ -51,6 +51,16 @@ func Update(ctx context.Context, client k8sclient.Client, rte *topologyexporterv
 	return nil
 }
 
+func FindCondition(conditions []metav1.Condition, condition string) *metav1.Condition {
+	for idx := 0; idx < len(conditions); idx++ {
+		cond := &conditions[idx]
+		if cond.Type == condition {
+			return cond
+		}
+	}
+	return nil
+}
+
 func getConditions(condition string, reason string, message string) []metav1.Condition {
 	conditions := getBaseConditions()
 	switch condition {
