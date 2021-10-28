@@ -99,7 +99,7 @@ binary:
 	go build -o bin/manager main.go
 
 binary-rte:
-	go build -o bin/rte rte/main.go
+	go build -o bin/exporter rte/main.go
 
 binary-e2e:
 	go test -v -c -o bin/e2e.test ./test/e2e
