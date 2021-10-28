@@ -1,0 +1,24 @@
+# permissions for end users to edit resourcetopologyexporters.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: resourcetopologyexporter-editor-role
+rules:
+- apiGroups:
+  - topologyexporter.openshift-kni.io
+  resources:
+  - resourcetopologyexporters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - topologyexporter.openshift-kni.io
+  resources:
+  - resourcetopologyexporters/status
+  verbs:
+  - get

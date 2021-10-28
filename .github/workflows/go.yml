@@ -1,0 +1,34 @@
+name: CI Go
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up golang
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+
+    - name: Check style
+      run: make vet  # TODO: enforce format check
+
+    - name: Build operand
+      run: make binary
+
+    - name: Build operator
+      run: make binary-rte
+
+    - name: Run unit tests
+      run: make test-unit
