@@ -7,22 +7,49 @@ on:
     branches: [ main ]
 
 jobs:
+  lint:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Verify
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.41.1
+        args: --timeout=15m0s --verbose
+
+  format:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: set up golang
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+
+    - name: format
+      run: ./hack/check-format.sh
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
 
     - name: Set up golang
       uses: actions/setup-go@v2
       with:
         go-version: 1.16
 
-    - name: Check style
-      run: make vet  # TODO: enforce format check
+    - name: Verify modules
+      run: go mod verify
+
+    - name: Vetting
+      run: make vet
 
     - name: Build operand
       run: make binary
