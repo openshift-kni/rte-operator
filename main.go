@@ -72,7 +72,7 @@ func main() {
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
-	flag.StringVar(&platformName, "P", "", "platform to deploy on - leave empty to autodetect")
+	flag.StringVar(&platformName, "platform", "", "platform to deploy on - leave empty to autodetect")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -81,7 +81,12 @@ func main() {
 
 	// if it is unknown, it's fine
 	userPlatform, _ := platform.FromString(platformName)
-	plat := detectPlatform(setupLog, userPlatform)
+	plat, err := detectPlatform(setupLog, userPlatform)
+	if err != nil {
+		setupLog.Error(err, "unable to detect")
+		os.Exit(1)
+	}
+
 	clusterPlatform := plat.Discovered
 	if clusterPlatform == platform.Unknown {
 		err := fmt.Errorf("cannot autodetect the platform, and no platform given")
@@ -163,7 +168,7 @@ type detectionOutput struct {
 	Discovered   platform.Platform `json:"discovered"`
 }
 
-func detectPlatform(debugLog logr.Logger, userSupplied platform.Platform) detectionOutput {
+func detectPlatform(debugLog logr.Logger, userSupplied platform.Platform) (detectionOutput, error) {
 	do := detectionOutput{
 		AutoDetected: platform.Unknown,
 		UserSupplied: userSupplied,
@@ -173,17 +178,17 @@ func detectPlatform(debugLog logr.Logger, userSupplied platform.Platform) detect
 	if do.UserSupplied != platform.Unknown {
 		debugLog.Info("user-supplied", "platform", do.UserSupplied)
 		do.Discovered = do.UserSupplied
-		return do
+		return do, nil
 	}
 
 	dp, err := detect.Detect()
 	if err != nil {
 		debugLog.Error(err, "failed to detect the platform")
-		return do
+		return do, err
 	}
 
 	debugLog.Info("auto-detected", "platform", dp)
 	do.AutoDetected = dp
 	do.Discovered = do.AutoDetected
-	return do
+	return do, nil
 }
