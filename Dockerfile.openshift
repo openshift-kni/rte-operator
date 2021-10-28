@@ -1,7 +1,7 @@
 FROM registry.access.redhat.com/ubi8/ubi-minimal
-COPY bin/manager /bin/rte-operator
+COPY manager /bin/rte-operator
 # bundle the operand, and use a backward compatible name for RTE
-COPY bin/exporter /bin/resource-topology-exporter
+COPY exporter /bin/resource-topology-exporter
 RUN mkdir /etc/resource-topology-exporter/ && \
     touch /etc/resource-topology-exporter/config.yaml
 RUN microdnf install pciutils
