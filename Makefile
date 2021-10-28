@@ -104,11 +104,15 @@ binary-rte:
 binary-e2e:
 	go test -v -c -o bin/e2e.test ./test/e2e
 
+binary-all: binary binary-rte
+
 build: generate fmt vet binary
 
 build-rte: fmt vet binary-rte
 
 build-e2e: fmt vet binary-e2e
+
+build-all: generate fmt vet binary binary-rte
 
 run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./main.go
