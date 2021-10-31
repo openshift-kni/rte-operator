@@ -35,14 +35,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
-	"github.com/fromanirh/rte-operator/controllers"
-	"github.com/fromanirh/rte-operator/pkg/images"
 	"github.com/go-logr/logr"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer/platform"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer/platform/detect"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/tlog"
+	topologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
+	"github.com/openshift-kni/rte-operator/controllers"
+	"github.com/openshift-kni/rte-operator/pkg/images"
 
 	apimanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/api"
 	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"

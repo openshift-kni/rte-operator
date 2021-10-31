@@ -26,7 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/fromanirh/rte-operator/pkg/objectstate"
+	"github.com/openshift-kni/rte-operator/pkg/objectstate"
 )
 
 func describeObject(obj client.Object) (string, error) {

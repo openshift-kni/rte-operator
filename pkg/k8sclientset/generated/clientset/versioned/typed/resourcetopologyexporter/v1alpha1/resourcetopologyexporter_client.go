@@ -18,8 +18,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
-	"github.com/fromanirh/rte-operator/pkg/k8sclientset/generated/clientset/versioned/scheme"
+	v1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
+	"github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

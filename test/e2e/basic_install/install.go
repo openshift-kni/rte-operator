@@ -26,10 +26,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/kubernetes/test/e2e/framework"
 
-	rteclientset "github.com/fromanirh/rte-operator/pkg/k8sclientset/generated/clientset/versioned/typed/resourcetopologyexporter/v1alpha1"
-	"github.com/fromanirh/rte-operator/pkg/status"
+	rteclientset "github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated/clientset/versioned/typed/resourcetopologyexporter/v1alpha1"
+	"github.com/openshift-kni/rte-operator/pkg/status"
 
-	rtev1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
+	rtev1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
 )
 
 var _ = ginkgo.Describe("[BasicInstall] Installation", func() {

@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
+	topologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 

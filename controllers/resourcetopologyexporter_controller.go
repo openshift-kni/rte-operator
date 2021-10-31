@@ -37,13 +37,13 @@ import (
 	apimanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/api"
 	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
 
-	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
+	topologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
 
-	"github.com/fromanirh/rte-operator/pkg/apply"
-	apistate "github.com/fromanirh/rte-operator/pkg/objectstate/api"
-	"github.com/fromanirh/rte-operator/pkg/objectstate/rte"
-	rtestate "github.com/fromanirh/rte-operator/pkg/objectstate/rte"
-	"github.com/fromanirh/rte-operator/pkg/status"
+	"github.com/openshift-kni/rte-operator/pkg/apply"
+	apistate "github.com/openshift-kni/rte-operator/pkg/objectstate/api"
+	"github.com/openshift-kni/rte-operator/pkg/objectstate/rte"
+	rtestate "github.com/openshift-kni/rte-operator/pkg/objectstate/rte"
+	"github.com/openshift-kni/rte-operator/pkg/status"
 )
 
 const (
