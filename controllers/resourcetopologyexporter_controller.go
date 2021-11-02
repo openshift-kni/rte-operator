@@ -63,8 +63,20 @@ type ResourceTopologyExporterReconciler struct {
 	ImageSpec    string
 }
 
-// TODO: missing permissions (roles, rolebinding, serviceaccount, daemonset...)
+// TODO: narrow down
 
+// Namespace Scoped
+// TODO
+
+// Cluster Scoped
+//+kubebuilder:rbac:groups=topology.node.k8s.io,resources=noderesourcetopologies,verbs=get;list;create;update
+//+kubebuilder:rbac:groups=config.openshift.io,resources=clusterversionss,verbs=list
+//+kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=resourcetopologyexporters,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=resourcetopologyexporters/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=resourcetopologyexporters/finalizers,verbs=update
