@@ -21,8 +21,8 @@ import (
 	"context"
 	"time"
 
-	v1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
-	scheme "github.com/fromanirh/rte-operator/pkg/k8sclientset/generated/clientset/versioned/scheme"
+	v1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
+	scheme "github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

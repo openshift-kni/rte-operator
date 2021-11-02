@@ -25,9 +25,9 @@ import (
 	apimanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/api"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/fromanirh/rte-operator/pkg/objectstate"
-	"github.com/fromanirh/rte-operator/pkg/objectstate/compare"
-	"github.com/fromanirh/rte-operator/pkg/objectstate/merge"
+	"github.com/openshift-kni/rte-operator/pkg/objectstate"
+	"github.com/openshift-kni/rte-operator/pkg/objectstate/compare"
+	"github.com/openshift-kni/rte-operator/pkg/objectstate/merge"
 )
 
 type ExistingManifests struct {

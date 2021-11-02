@@ -27,11 +27,11 @@ import (
 	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
+	topologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
 
-	"github.com/fromanirh/rte-operator/pkg/objectstate"
-	"github.com/fromanirh/rte-operator/pkg/objectstate/compare"
-	"github.com/fromanirh/rte-operator/pkg/objectstate/merge"
+	"github.com/openshift-kni/rte-operator/pkg/objectstate"
+	"github.com/openshift-kni/rte-operator/pkg/objectstate/compare"
+	"github.com/openshift-kni/rte-operator/pkg/objectstate/merge"
 )
 
 type ExistingManifests struct {

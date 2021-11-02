@@ -18,9 +18,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.com/fromanirh/rte-operator/pkg/k8sclientset/generated/clientset/versioned"
-	resourcetopologyexporterv1alpha1 "github.com/fromanirh/rte-operator/pkg/k8sclientset/generated/clientset/versioned/typed/resourcetopologyexporter/v1alpha1"
-	fakeresourcetopologyexporterv1alpha1 "github.com/fromanirh/rte-operator/pkg/k8sclientset/generated/clientset/versioned/typed/resourcetopologyexporter/v1alpha1/fake"
+	clientset "github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated/clientset/versioned"
+	resourcetopologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated/clientset/versioned/typed/resourcetopologyexporter/v1alpha1"
+	fakeresourcetopologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated/clientset/versioned/typed/resourcetopologyexporter/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

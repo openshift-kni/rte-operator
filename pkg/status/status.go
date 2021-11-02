@@ -27,7 +27,7 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	topologyexporterv1alpha1 "github.com/fromanirh/rte-operator/api/v1alpha1"
+	topologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
 )
 
 // TODO: are we duping these?

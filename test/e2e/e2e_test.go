@@ -31,7 +31,7 @@ import (
 	_ "github.com/k8stopologyawareschedwg/resource-topology-exporter/test/e2e/rte"
 	_ "github.com/k8stopologyawareschedwg/resource-topology-exporter/test/e2e/topology_updater"
 
-	_ "github.com/fromanirh/rte-operator/test/e2e/basic_install"
+	_ "github.com/openshift-kni/rte-operator/test/e2e/basic_install"
 )
 
 func TestMain(m *testing.M) {
