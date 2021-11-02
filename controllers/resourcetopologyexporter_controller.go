@@ -102,11 +102,7 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 
 	// note we intentionally NOT update the APIManifests - it is expected to be a NOP anyway
 	if r.Namespace != req.NamespacedName.Namespace {
-		logger.Info("Updating manifests", "namespace", req.NamespacedName.Namespace)
-		r.RTEManifests = r.RTEManifests.Update(rtemanifests.UpdateOptions{
-			Namespace: req.NamespacedName.Namespace,
-		})
-		rtestate.UpdateDaemonSetImage(r.RTEManifests.DaemonSet, r.ImageSpec)
+		r.RTEManifests = r.RenderManifests(req.NamespacedName.Namespace)
 		r.Namespace = req.NamespacedName.Namespace
 	}
 
@@ -119,6 +115,17 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 		}
 	}
 	return result, err
+}
+
+// RenderManifests renders the reconciler manifests so they can be deployed on the cluster.
+func (r *ResourceTopologyExporterReconciler) RenderManifests(namespace string) rtemanifests.Manifests {
+	logger := r.Log.WithValues("rte", namespace)
+	logger.Info("Updating manifests")
+	mf := r.RTEManifests.Update(rtemanifests.UpdateOptions{
+		Namespace: namespace,
+	})
+	rtestate.UpdateDaemonSetImage(mf.DaemonSet, r.ImageSpec)
+	return mf
 }
 
 func messageFromError(err error) string {

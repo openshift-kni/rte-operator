@@ -32,6 +32,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -44,6 +45,7 @@ import (
 	"github.com/openshift-kni/rte-operator/controllers"
 	"github.com/openshift-kni/rte-operator/pkg/images"
 
+	"github.com/k8stopologyawareschedwg/deployer/pkg/manifests"
 	apimanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/api"
 	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
 	//+kubebuilder:scaffold:imports
@@ -67,12 +69,16 @@ func main() {
 	var enableLeaderElection bool
 	var probeAddr string
 	var platformName string
+	var detectPlatformOnly bool
+	var renderManifestsFor string
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&platformName, "platform", "", "platform to deploy on - leave empty to autodetect")
+	flag.BoolVar(&detectPlatformOnly, "detect-platform-only", false, "detect and report the platform, then exits")
+	flag.StringVar(&renderManifestsFor, "render-manifests-for", "", "outputs the manifests rendered for given namespace, then exits")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -95,6 +101,11 @@ func main() {
 	}
 	setupLog.Info("detected cluster", "platform", clusterPlatform)
 
+	if detectPlatformOnly {
+		fmt.Printf("platform=%s\n", clusterPlatform)
+		os.Exit(0)
+	}
+
 	apiManifests, err := apimanifests.GetManifests(clusterPlatform)
 	if err != nil {
 		setupLog.Error(err, "unable to load the API manifests")
@@ -110,6 +121,23 @@ func main() {
 	setupLog.Info("RTE manifests loaded")
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	if renderManifestsFor != "" {
+		reconciler := &controllers.ResourceTopologyExporterReconciler{
+			Log:          ctrl.Log.WithName("controllers").WithName("RTE"),
+			APIManifests: apiManifests,
+			RTEManifests: rteManifests,
+			Platform:     clusterPlatform,
+			ImageSpec:    images.ResourceTopologyExporterDefaultImageSHA,
+		}
+
+		err := renderObjects(reconciler.RenderManifests(renderManifestsFor).ToObjects())
+		if err != nil {
+			setupLog.Error(err, "unable to render manifests")
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
@@ -191,4 +219,15 @@ func detectPlatform(debugLog logr.Logger, userSupplied platform.Platform) (detec
 	do.AutoDetected = dp
 	do.Discovered = do.AutoDetected
 	return do, nil
+}
+
+func renderObjects(objs []client.Object) error {
+	for _, obj := range objs {
+		fmt.Printf("---\n")
+		if err := manifests.SerializeObject(obj, os.Stdout); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
