@@ -18,22 +18,22 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated/clientset/versioned/typed/resourcetopologyexporter/v1alpha1"
+	v1alpha1 "github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated/clientset/versioned/typed/rteoperator/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )
 
-type FakeResourcetopologyexporterV1alpha1 struct {
+type FakeRteoperatorV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeResourcetopologyexporterV1alpha1) ResourceTopologyExporters(namespace string) v1alpha1.ResourceTopologyExporterInterface {
-	return &FakeResourceTopologyExporters{c, namespace}
+func (c *FakeRteoperatorV1alpha1) RTEOperators(namespace string) v1alpha1.RTEOperatorInterface {
+	return &FakeRTEOperators{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *FakeResourcetopologyexporterV1alpha1) RESTClient() rest.Interface {
+func (c *FakeRteoperatorV1alpha1) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
 	return ret
 }
