@@ -1,0 +1,48 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: rte-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: ResourceTopologyExporter is the Schema for the resourcetopologyexporters
+        API
+      displayName: Resource Topology Exporter
+      kind: ResourceTopologyExporter
+      name: resourcetopologyexporters.topologyexporter.openshift-kni.io
+      version: v1alpha1
+  description: resource topology exporter operator
+  displayName: rte-operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - RTE
+  links:
+  - name: RTE Operator
+    url: https://github.com/openshift-kni/rte-operator
+  maintainers:
+  - email: fromani@redhat.com
+    name: fromani
+  maturity: alpha
+  provider:
+    name: Red Hat
+  version: 4.10.0
