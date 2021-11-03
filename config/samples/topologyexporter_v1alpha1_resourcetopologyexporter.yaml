@@ -1,7 +1,7 @@
 apiVersion: topologyexporter.openshift-kni.io/v1alpha1
-kind: ResourceTopologyExporter
+kind: RTEOperator
 metadata:
-  name: resourcetopologyexporter-sample
+  name: rteoperator-sample
 spec:
   # Add fields here
   foo: bar

@@ -1,5 +1,5 @@
 apiVersion: topologyexporter.openshift-kni.io/v1alpha1
-kind: ResourceTopologyExporter
+kind: RTEOperator
 metadata:
-  name: resourcetopologyexporter
+  name: rteoperator
 spec: {}

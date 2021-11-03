@@ -27,7 +27,7 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	topologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
+	rteoperatorv1alpha1 "github.com/openshift-kni/rte-operator/api/rteoperator/v1alpha1"
 )
 
 // TODO: are we duping these?
@@ -38,7 +38,7 @@ const (
 	ConditionUpgradeable = "Upgradeable"
 )
 
-func Update(ctx context.Context, client k8sclient.Client, rte *topologyexporterv1alpha1.ResourceTopologyExporter, condition string, reason string, message string) error {
+func Update(ctx context.Context, client k8sclient.Client, rte *rteoperatorv1alpha1.RTEOperator, condition string, reason string, message string) error {
 	conditions := getConditions(condition, reason, message)
 	if equality.Semantic.DeepEqual(conditions, rte.Status.Conditions) {
 		return nil

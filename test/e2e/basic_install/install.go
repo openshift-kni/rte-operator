@@ -26,18 +26,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/kubernetes/test/e2e/framework"
 
-	rteclientset "github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated/clientset/versioned/typed/resourcetopologyexporter/v1alpha1"
+	rteoperatorclientset "github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated/clientset/versioned/typed/rteoperator/v1alpha1"
 	"github.com/openshift-kni/rte-operator/pkg/status"
 
-	rtev1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
+	rteoperatorv1alpha1 "github.com/openshift-kni/rte-operator/api/rteoperator/v1alpha1"
 )
 
 var _ = ginkgo.Describe("[BasicInstall] Installation", func() {
 
 	var (
 		initialized bool
-		rteClient   *rteclientset.ResourcetopologyexporterV1alpha1Client
-		rteObj      *rtev1alpha1.ResourceTopologyExporter
+		rteClient   *rteoperatorclientset.RteoperatorV1alpha1Client
+		rteObj      *rteoperatorv1alpha1.RTEOperator
 	)
 
 	f := framework.NewDefaultFramework("rte")
@@ -48,7 +48,7 @@ var _ = ginkgo.Describe("[BasicInstall] Installation", func() {
 		if !initialized {
 			rteObj = testRTE(f)
 
-			rteClient, err = rteclientset.NewForConfig(f.ClientConfig())
+			rteClient, err = rteoperatorclientset.NewForConfig(f.ClientConfig())
 			gomega.Expect(err).NotTo(gomega.HaveOccurred())
 			initialized = true
 		}
@@ -57,12 +57,12 @@ var _ = ginkgo.Describe("[BasicInstall] Installation", func() {
 	ginkgo.Context("with a running cluster without any components", func() {
 		ginkgo.It("should perform overall deployment and verify the condition is reported as available", func() {
 			ginkgo.By("creating the RTE object")
-			_, err := rteClient.ResourceTopologyExporters(rteObj.Namespace).Create(context.TODO(), rteObj, metav1.CreateOptions{})
+			_, err := rteClient.RTEOperators(rteObj.Namespace).Create(context.TODO(), rteObj, metav1.CreateOptions{})
 			gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
 			ginkgo.By("checking that the condition Available=true")
 			gomega.Eventually(func() bool {
-				rteUpdated, err := rteClient.ResourceTopologyExporters(rteObj.Namespace).Get(context.TODO(), rteObj.Name, metav1.GetOptions{})
+				rteUpdated, err := rteClient.RTEOperators(rteObj.Namespace).Get(context.TODO(), rteObj.Name, metav1.GetOptions{})
 				if err != nil {
 					framework.Logf("failed to get the RTE resource: %v", err)
 					return false
@@ -82,16 +82,16 @@ var _ = ginkgo.Describe("[BasicInstall] Installation", func() {
 	})
 })
 
-func testRTE(f *framework.Framework) *rtev1alpha1.ResourceTopologyExporter {
-	return &rtev1alpha1.ResourceTopologyExporter{
+func testRTE(f *framework.Framework) *rteoperatorv1alpha1.RTEOperator {
+	return &rteoperatorv1alpha1.RTEOperator{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "ResourceTopologyExporter",
-			APIVersion: rtev1alpha1.GroupVersion.String(),
+			Kind:       "RTEOperator",
+			APIVersion: rteoperatorv1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "resourcetopologyexporter",
+			Name:      "rteoperator",
 			Namespace: f.Namespace.Name,
 		},
-		Spec: rtev1alpha1.ResourceTopologyExporterSpec{},
+		Spec: rteoperatorv1alpha1.RTEOperatorSpec{},
 	}
 }

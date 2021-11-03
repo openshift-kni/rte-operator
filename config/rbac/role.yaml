@@ -96,7 +96,7 @@ rules:
 - apiGroups:
   - topologyexporter.openshift-kni.io
   resources:
-  - resourcetopologyexporters
+  - rteoperators
   verbs:
   - create
   - delete
@@ -108,13 +108,13 @@ rules:
 - apiGroups:
   - topologyexporter.openshift-kni.io
   resources:
-  - resourcetopologyexporters/finalizers
+  - rteoperators/finalizers
   verbs:
   - update
 - apiGroups:
   - topologyexporter.openshift-kni.io
   resources:
-  - resourcetopologyexporters/status
+  - rteoperators/status
   verbs:
   - get
   - patch

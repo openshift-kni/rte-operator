@@ -37,7 +37,7 @@ import (
 	apimanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/api"
 	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
 
-	topologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
+	rteoperatorv1alpha1 "github.com/openshift-kni/rte-operator/api/rteoperator/v1alpha1"
 
 	"github.com/openshift-kni/rte-operator/pkg/apply"
 	apistate "github.com/openshift-kni/rte-operator/pkg/objectstate/api"
@@ -47,7 +47,7 @@ import (
 )
 
 const (
-	defaultRTEOperatorCrName = "RTEOperator"
+	defaultRTEOperatorCrName = "rteoperator"
 )
 
 // RTEOperatorReconciler reconciles a RTEOperator object
@@ -77,9 +77,9 @@ type RTEOperatorReconciler struct {
 //+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=RTEOperators,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=RTEOperators/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=RTEOperators/finalizers,verbs=update
+//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=rteoperators,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=rteoperators/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=rteoperators/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -90,7 +90,7 @@ func (r *RTEOperatorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	_ = context.Background()
 	logger := r.Log.WithValues("rte", req.NamespacedName)
 
-	instance := &topologyexporterv1alpha1.RTEOperator{}
+	instance := &rteoperatorv1alpha1.RTEOperator{}
 	err := r.Get(context.TODO(), req.NamespacedName, instance)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
@@ -151,7 +151,7 @@ func messageFromError(err error) string {
 	return unwErr.Error()
 }
 
-func (r *RTEOperatorReconciler) reconcileResource(ctx context.Context, req ctrl.Request, instance *topologyexporterv1alpha1.RTEOperator) (ctrl.Result, string, error) {
+func (r *RTEOperatorReconciler) reconcileResource(ctx context.Context, req ctrl.Request, instance *rteoperatorv1alpha1.RTEOperator) (ctrl.Result, string, error) {
 	var err error
 	err = r.syncNodeResourceTopologyAPI(instance)
 	if err != nil {
@@ -174,7 +174,7 @@ func (r *RTEOperatorReconciler) reconcileResource(ctx context.Context, req ctrl.
 	return ctrl.Result{}, status.ConditionAvailable, nil
 }
 
-func (r *RTEOperatorReconciler) syncNodeResourceTopologyAPI(instance *topologyexporterv1alpha1.RTEOperator) error {
+func (r *RTEOperatorReconciler) syncNodeResourceTopologyAPI(instance *rteoperatorv1alpha1.RTEOperator) error {
 	logger := r.Log.WithName("APISync")
 	logger.Info("Start")
 
@@ -188,13 +188,13 @@ func (r *RTEOperatorReconciler) syncNodeResourceTopologyAPI(instance *topologyex
 	return nil
 }
 
-func (r *RTEOperatorReconciler) syncRTEOperatorResources(instance *topologyexporterv1alpha1.RTEOperator) (topologyexporterv1alpha1.NamespacedName, error) {
+func (r *RTEOperatorReconciler) syncRTEOperatorResources(instance *rteoperatorv1alpha1.RTEOperator) (rteoperatorv1alpha1.NamespacedName, error) {
 	logger := r.Log.WithName("RTESync")
 	logger.Info("Start")
 
 	Existing := rtestate.FromClient(context.TODO(), r.Client, r.Platform, r.RTEManifests)
 
-	res := topologyexporterv1alpha1.NamespacedName{}
+	res := rteoperatorv1alpha1.NamespacedName{}
 	for _, objState := range Existing.State(r.RTEManifests) {
 		if err := controllerutil.SetControllerReference(instance, objState.Desired, r.Scheme); err != nil {
 			return res, errors.Wrapf(err, "Failed to set controller reference to %s %s", objState.Desired.GetNamespace(), objState.Desired.GetName())
@@ -214,6 +214,6 @@ func (r *RTEOperatorReconciler) syncRTEOperatorResources(instance *topologyexpor
 // SetupWithManager sets up the controller with the Manager.
 func (r *RTEOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&topologyexporterv1alpha1.RTEOperator{}).
+		For(&rteoperatorv1alpha1.RTEOperator{}).
 		Complete(r)
 }

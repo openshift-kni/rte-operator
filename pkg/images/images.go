@@ -22,10 +22,10 @@ import (
 
 func init() {
 	if rteImage, ok := os.LookupEnv("TAS_RESOURCE_EXPORTER_IMAGE"); ok {
-		ResourceTopologyExporterImage = rteImage
+		RTEOperatorImage = rteImage
 	}
 }
 
 var (
-	ResourceTopologyExporterImage = ResourceTopologyExporterDefaultImageSHA
+	RTEOperatorImage = RTEOperatorDefaultImageSHA
 )

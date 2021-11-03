@@ -6,23 +6,22 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.1
   creationTimestamp: null
-  name: resourcetopologyexporters.topologyexporter.openshift-kni.io
+  name: rteoperators.topologyexporter.openshift-kni.io
 spec:
   group: topologyexporter.openshift-kni.io
   names:
-    kind: ResourceTopologyExporter
-    listKind: ResourceTopologyExporterList
-    plural: resourcetopologyexporters
+    kind: RTEOperator
+    listKind: RTEOperatorList
+    plural: rteoperators
     shortNames:
-    - rte
-    singular: resourcetopologyexporter
+    - rteo
+    singular: rteoperator
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ResourceTopologyExporter is the Schema for the resourcetopologyexporters
-          API
+        description: RTEOperator is the Schema for the rteoperators API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -37,16 +36,13 @@ spec:
           metadata:
             type: object
           spec:
-            description: ResourceTopologyExporterSpec defines the desired state of
-              ResourceTopologyExporter
+            description: RTEOperatorSpec defines the desired state of RTEOperator
             type: object
           status:
-            description: ResourceTopologyExporterStatus defines the observed state
-              of ResourceTopologyExporter
+            description: RTEOperatorStatus defines the observed state of RTEOperator
             properties:
               conditions:
-                description: Conditions show the current state of the ResourceTopologyExporter
-                  Operator
+                description: Conditions show the current state of the RTEOperator
                 items:
                   description: "Condition contains details for one aspect of the current
                     state of this API Resource. --- This struct is intended for direct

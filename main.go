@@ -41,7 +41,7 @@ import (
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer/platform"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/deployer/platform/detect"
 	"github.com/k8stopologyawareschedwg/deployer/pkg/tlog"
-	topologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
+	rteoperatorv1alpha1 "github.com/openshift-kni/rte-operator/api/rteoperator/v1alpha1"
 	"github.com/openshift-kni/rte-operator/controllers"
 	"github.com/openshift-kni/rte-operator/pkg/images"
 
@@ -60,7 +60,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(apiextensionsv1.AddToScheme(scheme))
-	utilruntime.Must(topologyexporterv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(rteoperatorv1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -123,12 +123,12 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	if renderManifestsFor != "" {
-		reconciler := &controllers.ResourceTopologyExporterReconciler{
+		reconciler := &controllers.RTEOperatorReconciler{
 			Log:          ctrl.Log.WithName("controllers").WithName("RTE"),
 			APIManifests: apiManifests,
 			RTEManifests: rteManifests,
 			Platform:     clusterPlatform,
-			ImageSpec:    images.ResourceTopologyExporterDefaultImageSHA,
+			ImageSpec:    images.RTEOperatorDefaultImageSHA,
 		}
 
 		err := renderObjects(reconciler.RenderManifests(renderManifestsFor).ToObjects())
@@ -159,7 +159,7 @@ func main() {
 	}
 	setupLog.Info("using RTE image", "spec", imageSpec)
 
-	if err = (&controllers.ResourceTopologyExporterReconciler{
+	if err = (&controllers.RTEOperatorReconciler{
 		Client:       mgr.GetClient(),
 		Scheme:       mgr.GetScheme(),
 		Log:          ctrl.Log.WithName("controllers").WithName("RTE"),
@@ -169,7 +169,7 @@ func main() {
 		Helper:       deployer.NewHelperWithClient(mgr.GetClient(), "", tlog.NewNullLogAdapter()),
 		ImageSpec:    imageSpec,
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "ResourceTopologyExporter")
+		setupLog.Error(err, "unable to create controller", "controller", "RTEOperator")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

@@ -27,7 +27,7 @@ import (
 	rtemanifests "github.com/k8stopologyawareschedwg/deployer/pkg/manifests/rte"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	topologyexporterv1alpha1 "github.com/openshift-kni/rte-operator/api/v1alpha1"
+	rteoperatorv1alpha1 "github.com/openshift-kni/rte-operator/api/rteoperator/v1alpha1"
 
 	"github.com/openshift-kni/rte-operator/pkg/objectstate"
 	"github.com/openshift-kni/rte-operator/pkg/objectstate/compare"
@@ -124,8 +124,8 @@ func FromClient(ctx context.Context, cli client.Client, plat platform.Platform, 
 	return ret
 }
 
-func NamespacedNameFromObject(obj client.Object) (topologyexporterv1alpha1.NamespacedName, bool) {
-	res := topologyexporterv1alpha1.NamespacedName{
+func NamespacedNameFromObject(obj client.Object) (rteoperatorv1alpha1.NamespacedName, bool) {
+	res := rteoperatorv1alpha1.NamespacedName{
 		Namespace: obj.GetNamespace(),
 		Name:      obj.GetName(),
 	}

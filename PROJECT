@@ -13,7 +13,7 @@ resources:
   controller: true
   domain: openshift-kni.io
   group: topologyexporter
-  kind: ResourceTopologyExporter
-  path: github.com/openshift-kni/rte-operator/api/v1alpha1
+  kind: RTEOperator
+  path: github.com/openshift-kni/rte-operator/api/rteoperator/v1alpha1
   version: v1alpha1
 version: "3"

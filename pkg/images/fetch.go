@@ -35,12 +35,12 @@ func GetCurrentImage(cli client.Client, ctx context.Context) (string, error) {
 	podNamespace, ok := os.LookupEnv(envVarPodNamespace)
 	if !ok {
 		// TODO log
-		return ResourceTopologyExporterDefaultImageSHA, fmt.Errorf("environment variable not set: %q", envVarPodNamespace)
+		return RTEOperatorDefaultImageSHA, fmt.Errorf("environment variable not set: %q", envVarPodNamespace)
 	}
 	podName, ok := os.LookupEnv(envVarPodName)
 	if !ok {
 		// TODO log
-		return ResourceTopologyExporterDefaultImageSHA, fmt.Errorf("environment variable not set: %q", envVarPodName)
+		return RTEOperatorDefaultImageSHA, fmt.Errorf("environment variable not set: %q", envVarPodName)
 	}
 	return GetImageFromPod(cli, ctx, podNamespace, podName, "")
 }
