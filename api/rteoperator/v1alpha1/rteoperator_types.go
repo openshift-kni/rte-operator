@@ -41,41 +41,41 @@ func (n NamespacedName) String() string {
 	return n.Namespace + string(Separator) + n.Name
 }
 
-// ResourceTopologyExporterSpec defines the desired state of ResourceTopologyExporter
-type ResourceTopologyExporterSpec struct {
+// RTEOperatorSpec defines the desired state of RTEOperator
+type RTEOperatorSpec struct {
 }
 
-// ResourceTopologyExporterStatus defines the observed state of ResourceTopologyExporter
-type ResourceTopologyExporterStatus struct {
+// RTEOperatorStatus defines the observed state of RTEOperator
+type RTEOperatorStatus struct {
 	DaemonSet *NamespacedName `json:"daemonset,omitempty"`
 
-	// Conditions show the current state of the ResourceTopologyExporter Operator
+	// Conditions show the current state of the RTEOperator
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
 //+genclient
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:resource:shortName=rte,path=resourcetopologyexporters
+//+kubebuilder:resource:shortName=rteo,path=rteoperators
 
-// ResourceTopologyExporter is the Schema for the resourcetopologyexporters API
-type ResourceTopologyExporter struct {
+// RTEOperator is the Schema for the rteoperators API
+type RTEOperator struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ResourceTopologyExporterSpec   `json:"spec,omitempty"`
-	Status ResourceTopologyExporterStatus `json:"status,omitempty"`
+	Spec   RTEOperatorSpec   `json:"spec,omitempty"`
+	Status RTEOperatorStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// ResourceTopologyExporterList contains a list of ResourceTopologyExporter
-type ResourceTopologyExporterList struct {
+// RTEOperatorList contains a list of RTEOperator
+type RTEOperatorList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ResourceTopologyExporter `json:"items"`
+	Items           []RTEOperator `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&ResourceTopologyExporter{}, &ResourceTopologyExporterList{})
+	SchemeBuilder.Register(&RTEOperator{}, &RTEOperatorList{})
 }

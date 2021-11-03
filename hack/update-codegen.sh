@@ -27,8 +27,7 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${SCRIPT_ROOT}"; ls -d -1 ./vendor/k8s.io/code-
 #                  instead of the $GOPATH directly. For normal projects this can be dropped.
 #
 bash "${CODEGEN_PKG}"/generate-groups.sh "client" \
-  github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated github.com/openshift-kni/rte-operator/pkg/apis \
-  resourcetopologyexporter:v1alpha1 \
+  github.com/openshift-kni/rte-operator/pkg/k8sclientset/generated github.com/openshift-kni/rte-operator/api \
+  rteoperator:v1alpha1 \
   --output-base "$(dirname "${BASH_SOURCE[0]}")/../../../.." \
   --go-header-file "${SCRIPT_ROOT}"/hack/boilerplate.go.txt
-

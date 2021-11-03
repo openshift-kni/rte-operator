@@ -47,11 +47,11 @@ import (
 )
 
 const (
-	defaultResourceTopologyExporterCrName = "resourcetopologyexporter"
+	defaultRTEOperatorCrName = "RTEOperator"
 )
 
-// ResourceTopologyExporterReconciler reconciles a ResourceTopologyExporter object
-type ResourceTopologyExporterReconciler struct {
+// RTEOperatorReconciler reconciles a RTEOperator object
+type RTEOperatorReconciler struct {
 	client.Client
 	Log          logr.Logger
 	Scheme       *runtime.Scheme
@@ -77,20 +77,20 @@ type ResourceTopologyExporterReconciler struct {
 //+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=resourcetopologyexporters,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=resourcetopologyexporters/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=resourcetopologyexporters/finalizers,verbs=update
+//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=RTEOperators,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=RTEOperators/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=topologyexporter.openshift-kni.io,resources=RTEOperators/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.9.2/pkg/reconcile
-func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *RTEOperatorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	logger := r.Log.WithValues("rte", req.NamespacedName)
 
-	instance := &topologyexporterv1alpha1.ResourceTopologyExporter{}
+	instance := &topologyexporterv1alpha1.RTEOperator{}
 	err := r.Get(context.TODO(), req.NamespacedName, instance)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
@@ -103,11 +103,11 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 		return ctrl.Result{}, err
 	}
 
-	if req.Name != defaultResourceTopologyExporterCrName {
-		err := fmt.Errorf("ResourceTopologyExporter resource name must be %q", defaultResourceTopologyExporterCrName)
-		logger.Error(err, "Incorrect ResourceTopologyExporter resource name", "name", req.Name)
-		if err := status.Update(context.TODO(), r.Client, instance, status.ConditionDegraded, "IncorrectResourceTopologyExporterResourceName", fmt.Sprintf("Incorrect ResourceTopologyExporter resource name: %s", req.Name)); err != nil {
-			logger.Error(err, "Failed to update resourcetopologyexporter status", "Desired status", status.ConditionDegraded)
+	if req.Name != defaultRTEOperatorCrName {
+		err := fmt.Errorf("RTEOperator resource name must be %q", defaultRTEOperatorCrName)
+		logger.Error(err, "Incorrect RTEOperator resource name", "name", req.Name)
+		if err := status.Update(context.TODO(), r.Client, instance, status.ConditionDegraded, "IncorrectRTEOperatorResourceName", fmt.Sprintf("Incorrect RTEOperator resource name: %s", req.Name)); err != nil {
+			logger.Error(err, "Failed to update RTEOperator status", "Desired status", status.ConditionDegraded)
 		}
 		return ctrl.Result{}, nil // Return success to avoid requeue
 	}
@@ -123,14 +123,14 @@ func (r *ResourceTopologyExporterReconciler) Reconcile(ctx context.Context, req 
 		// TODO: use proper reason
 		reason, message := condition, messageFromError(err)
 		if err := status.Update(context.TODO(), r.Client, instance, condition, reason, message); err != nil {
-			logger.Info("Failed to update resourcetopologyexporter status", "Desired condition", condition, "error", err)
+			logger.Info("Failed to update RTEOperator status", "Desired condition", condition, "error", err)
 		}
 	}
 	return result, err
 }
 
 // RenderManifests renders the reconciler manifests so they can be deployed on the cluster.
-func (r *ResourceTopologyExporterReconciler) RenderManifests(namespace string) rtemanifests.Manifests {
+func (r *RTEOperatorReconciler) RenderManifests(namespace string) rtemanifests.Manifests {
 	logger := r.Log.WithValues("rte", namespace)
 	logger.Info("Updating manifests")
 	mf := r.RTEManifests.Update(rtemanifests.UpdateOptions{
@@ -151,14 +151,14 @@ func messageFromError(err error) string {
 	return unwErr.Error()
 }
 
-func (r *ResourceTopologyExporterReconciler) reconcileResource(ctx context.Context, req ctrl.Request, instance *topologyexporterv1alpha1.ResourceTopologyExporter) (ctrl.Result, string, error) {
+func (r *RTEOperatorReconciler) reconcileResource(ctx context.Context, req ctrl.Request, instance *topologyexporterv1alpha1.RTEOperator) (ctrl.Result, string, error) {
 	var err error
 	err = r.syncNodeResourceTopologyAPI(instance)
 	if err != nil {
 		return ctrl.Result{}, status.ConditionDegraded, errors.Wrapf(err, "FailedAPISync")
 	}
 
-	dsInfo, err := r.syncResourceTopologyExporterResources(instance)
+	dsInfo, err := r.syncRTEOperatorResources(instance)
 	if err != nil {
 		return ctrl.Result{}, status.ConditionDegraded, errors.Wrapf(err, "FailedRTESync")
 	}
@@ -174,7 +174,7 @@ func (r *ResourceTopologyExporterReconciler) reconcileResource(ctx context.Conte
 	return ctrl.Result{}, status.ConditionAvailable, nil
 }
 
-func (r *ResourceTopologyExporterReconciler) syncNodeResourceTopologyAPI(instance *topologyexporterv1alpha1.ResourceTopologyExporter) error {
+func (r *RTEOperatorReconciler) syncNodeResourceTopologyAPI(instance *topologyexporterv1alpha1.RTEOperator) error {
 	logger := r.Log.WithName("APISync")
 	logger.Info("Start")
 
@@ -188,7 +188,7 @@ func (r *ResourceTopologyExporterReconciler) syncNodeResourceTopologyAPI(instanc
 	return nil
 }
 
-func (r *ResourceTopologyExporterReconciler) syncResourceTopologyExporterResources(instance *topologyexporterv1alpha1.ResourceTopologyExporter) (topologyexporterv1alpha1.NamespacedName, error) {
+func (r *RTEOperatorReconciler) syncRTEOperatorResources(instance *topologyexporterv1alpha1.RTEOperator) (topologyexporterv1alpha1.NamespacedName, error) {
 	logger := r.Log.WithName("RTESync")
 	logger.Info("Start")
 
@@ -212,8 +212,8 @@ func (r *ResourceTopologyExporterReconciler) syncResourceTopologyExporterResourc
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *ResourceTopologyExporterReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *RTEOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&topologyexporterv1alpha1.ResourceTopologyExporter{}).
+		For(&topologyexporterv1alpha1.RTEOperator{}).
 		Complete(r)
 }

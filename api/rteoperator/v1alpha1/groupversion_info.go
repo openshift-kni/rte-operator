@@ -33,4 +33,7 @@ var (
 
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme
+
+	// SchemeGroupVersion is DEPRECATED, needed for the client generation
+	SchemeGroupVersion = GroupVersion
 )
