@@ -26,7 +26,7 @@ spec:
         runAsNonRoot: true
       containers:
       - command:
-        - /manager
+        - /bin/rte-operator
         args:
         - --leader-elect
         image: controller:latest
